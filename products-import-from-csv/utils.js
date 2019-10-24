@@ -44,12 +44,12 @@ async function graphQLFetcher(graphQLParams) {
 
 async function getTenantInfo(tenantId) {
   const data = await graphQLFetcher({
-    query: `query getTenantInfo($tenantId: Int!) {
+    query: `query getTenantInfo($tenantId: ID!) {
         tenant(id: $tenantId) {
           rootItemId
           shapes {
             id
-            shapeTypeId
+            type
             name {
               language
               translation
@@ -78,7 +78,7 @@ function tr(translations) {
 }
 
 async function getTenantId() {
-  const { tenantId: tenantIdInput } = await inquirer.prompt([
+  const { tenantId } = await inquirer.prompt([
     {
       name: 'tenantId',
       message: 'Please enter the tenant ID (e.g. 99):',
@@ -104,13 +104,6 @@ async function getTenantId() {
     secret,
   });
 
-  const tenantId = parseInt(tenantIdInput);
-  if (Number.isNaN(tenantId)) {
-    throw new Error(
-      `Tenant id is not a number. You entered "${tenantIdInput}"`,
-    );
-  }
-
   return tenantId;
 }
 
@@ -120,7 +113,7 @@ async function getExtraProductProperties(tenantId) {
 
   spinner.stop();
 
-  const productShapes = shapes.filter(shape => shape.shapeTypeId === 'product');
+  const productShapes = shapes.filter(shape => shape.type === 'product');
 
   if (productShapes.length === 0) {
     throw new Error(
